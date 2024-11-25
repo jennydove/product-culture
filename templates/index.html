@@ -3,104 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Score "Empowered"</title>
+    <title>PCVW App - PM Team Characteristics Voting</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>Score the word "Empowered"</h1>
-        
-        <form id="score-form">
-            <div class="form-group">
-                <label>
-                    <input type="radio" name="score" value="L" required> Low
-                </label>
-                <label>
-                    <input type="radio" name="score" value="M" required> Medium
-                </label>
-                <label>
-                    <input type="radio" name="score" value="H" required> High
-                </label>
+        <h1>PM Team Characteristics Voting</h1>
+        <p>For each of the characteristics below, rate how important it is for your future PM team. You can vote by dragging the slider.</p>
+        <p>Aim to have around 5 be "very important", 5 be "not important" and the rest land somewhere in the middle.</p>
+        <p>It often helps to read through all of them before beginning to vote.</p>
+
+        <form id="voting-form">
+            {% for term in terms %}
+            <div class="slider-group">
+                <label for="{{ term }}">{{ term }}</label>
+                <div class="slider-container">
+                    <input type="range" id="{{ term }}" name="{{ term }}" min="-2" max="2" step="0.1" value="0" class="slider">
+                    <span class="score">0</span>
+                </div>
             </div>
-            <button type="submit" class="btn">Submit Score</button>
-            <button type="button" class="btn" id="clear-btn">Clear</button>
+            {% endfor %}
+
+            <div id="average-container">
+                <p>Current Average: <span id="current-average">0</span></p>
+            </div>
+
+            <button type="button" id="reset-btn" class="btn">Reset</button>
+            <button type="submit" id="submit-btn" class="btn">Submit</button>
         </form>
 
-        <div id="flash-messages"></div>
+        <div id="message" class="hidden"></div>
 
-        <div class="loading">
-            <p>Submitting score...</p>
-        </div>
-
-        <div class="results">
+        <div id="results-container" class="hidden">
             <h2>Results</h2>
-            <table>
-                <tr>
-                    <th>Score</th>
-                    <th>Count</th>
-                </tr>
-                <tr>
-                    <td>Low</td>
-                    <td id="low-count">{{ scores['L'] }}</td>
-                </tr>
-                <tr>
-                    <td>Medium</td>
-                    <td id="medium-count">{{ scores['M'] }}</td>
-                </tr>
-                <tr>
-                    <td>High</td>
-                    <td id="high-count">{{ scores['H'] }}</td>
-                </tr>
-                <tr>
-                    <td>Total</td>
-                    <td id="total-count">{{ scores['total'] }}</td>
-                </tr>
-            </table>
+            <div id="results-content"></div>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('#score-form').on('submit', function(e) {
-                e.preventDefault();
-                $('.loading').show();
-                
-                $.ajax({
-                    url: '/submit_score',
-                    method: 'POST',
-                    data: $(this).serialize(),
-                    success: function(response) {
-                        $('.loading').hide();
-                        if (response.success) {
-                            showFlashMessage(response.message, 'success');
-                            updateScores(response.scores);
-                        } else {
-                            showFlashMessage(response.message, 'error');
-                        }
-                    },
-                    error: function() {
-                        $('.loading').hide();
-                        showFlashMessage('An error occurred. Please try again.', 'error');
-                    }
-                });
-            });
-
-            $('#clear-btn').on('click', function() {
-                $('input[name="score"]').prop('checked', false);
-            });
-
-            function showFlashMessage(message, type) {
-                $('#flash-messages').html('<div class="flash-message flash-' + type + '">' + message + '</div>');
-            }
-
-            function updateScores(scores) {
-                $('#low-count').text(scores.L);
-                $('#medium-count').text(scores.M);
-                $('#high-count').text(scores.H);
-                $('#total-count').text(scores.total);
-            }
-        });
-    </script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
